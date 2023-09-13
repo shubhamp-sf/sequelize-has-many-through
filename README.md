@@ -1,3 +1,72 @@
+
+The `scope` works for everything else other than `order` and `limit` in has many through relation.
+Due to this issue https://github.com/sequelize/sequelize/issues/4376 (separate is used for these two options to work in relations)
+
+I don’t see any direct alternative that can be done in this extension but sorting can be achieved if we directly call the findAll on sequelize something like this
+```ts
+this.doctorRepo.sequelizeModel.findAll({
+      include: 'patients',
+      order: [[Sequelize.literal('Patients.id'), 'DESC']],
+});
+```
+
+Though it also include the through table result
+
+Example response:
+
+```json
+[
+  {
+    "id": 2,
+    "name": "Dr. Two",
+    "patients": [
+      {
+        "id": 4,
+        "name": "A Patient 4",
+        "Appointment": {
+          "id": 4,
+          "doctorId": 2,
+          "patientId": 4
+        }
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Dr. Joe",
+    "patients": [
+      {
+        "id": 3,
+        "name": "A Patient 3",
+        "Appointment": {
+          "id": 3,
+          "doctorId": 1,
+          "patientId": 3
+        }
+      },
+      {
+        "id": 2,
+        "name": "Patient 2",
+        "Appointment": {
+          "id": 2,
+          "doctorId": 1,
+          "patientId": 2
+        }
+      },
+      {
+        "id": 1,
+        "name": "Patient 1",
+        "Appointment": {
+          "id": 1,
+          "doctorId": 1,
+          "patientId": 1
+        }
+      }
+    ]
+  }
+]
+```
+
 # sequelize-has-many-through
 
 This application is generated using [LoopBack 4 CLI](https://loopback.io/doc/en/lb4/Command-line-interface.html) with the
